@@ -27,7 +27,7 @@ const DEFAULT_OPTIONS = [
   },
   {
     name: "Saturation",
-    property: "saturation",
+    property: "saturate",
     value: 100,
     range: {
       min: 0,
@@ -48,10 +48,10 @@ const DEFAULT_OPTIONS = [
   {
     name: "Sepia",
     property: "sepia",
-    value: 100,
+    value: 0,
     range: {
       min: 0,
-      max: 200,
+      max: 100,
     },
     unit: "%",
   },
@@ -78,16 +78,50 @@ const DEFAULT_OPTIONS = [
 ];
 
 function App() {
+  const [selectedOptionIndex, setSelectedOptIndex] = useState(0);
   const [options, setOptions] = useState(DEFAULT_OPTIONS);
+  const selectedOption = options[selectedOptionIndex];
+
+  function handleSliderChange({ target }) {
+    setOptions((prevOptions) => {
+      return prevOptions.map((option, index) => {
+        if (index !== selectedOptionIndex) return option;
+        return { ...option, value: target.value };
+      });
+    });
+  }
+
+  function getImageStyle() {
+    const filters = options.map((option) => {
+      return `${option.property}(${option.value}${option.unit})`;
+    });
+
+    return { filter: filters.join(" ") };
+  }
+
+  console.log(getImageStyle());
+
   return (
     <div className="container">
-      <div className="main-image" />
+      <div className="main-image" style={getImageStyle()} />
       <div className="sidebar">
         {options.map((option, index) => {
-          return <SidebarItem key={index} name={option.name} />;
+          return (
+            <SidebarItem
+              key={index}
+              name={option.name}
+              active={index === selectedOptionIndex}
+              handleClick={() => setSelectedOptIndex(index)}
+            />
+          );
         })}
       </div>
-      <Slider />
+      <Slider
+        min={selectedOption.range.min}
+        max={selectedOption.range.max}
+        value={selectedOption.value}
+        handleChange={handleSliderChange}
+      />
     </div>
   );
 }
